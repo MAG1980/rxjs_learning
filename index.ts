@@ -1,47 +1,58 @@
-//cb / promise / generator / async - await
+//ReactiveX pattern
+//ReactiveX = Iterator + Observer + Functional Programming
 
-//Promise отлично работает с едниничными значениями
-const sequencePromise = new Promise((res) => {
-    let count = 1
-    setInterval(() =>
-      res(count++))
+//Для распределения данных, приходящих от Observer, во времени требуется Iterator
+//Паттерн Iterator стандартизует распределение данных во времени.
+//Паттерн Iterator позволяет распределять данные во времени независимо от их формата (файлы,строки, числа, JSON -
+// неважно)
+
+//Паттерн Iterator основан на механизме перебора
+//По умолчанию перебор объектов в JS не реализован (for in не в счёт)
+
+//Для перебора объекта в JS необходимо создать кастомный итератор
+class CustomIterator {
+  /**
+   * @param cursor  номер текущего элемента
+   * @param value   значение текущего элемента
+   * @param array
+   * @param divisor номер элемента-разделителя
+   */
+  private cursor = 0
+  private value: number
+
+  constructor(private array: number[], private divisor: number = 1) {
   }
-)
 
-sequencePromise.then((value) => console.log(value)) // 1
-sequencePromise.then((value) => console.log(value)) // 1
+  //Возвращает элементы массива, за исключением делящихся на divisor без остатка
+  public next() {
+    while (this.cursor < this.array.length) {
+      this.value = this.array[this.cursor++]
+      if (this.value % this.divisor === 0) {
+        return { done: false, value: this.value }
+      }
+    }
+    return { done: true, value: this.value }
+  }
 
-
-//Function Generators позволяют работать с множественными значениями.
-function* iteratorFn() {
-  let item = 1
-  while (true) {
-    yield(item++)
+  [Symbol.iterator]() {
+    return {
+      next: this.next.bind(this)
+    }
   }
 }
 
-const sequenceGenerator = iteratorFn()
+const consumer = new CustomIterator([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3)
 
-console.log(sequenceGenerator.next().value)
-console.log(sequenceGenerator.next().value)
-console.log(sequenceGenerator.next().value)
-console.log(sequenceGenerator.next().value)
+// console.log(consumer.next())   3
+// console.log(consumer.next())   6
+// console.log(consumer.next())   9
+// console.log(consumer.next())   10
+// console.log(consumer.next())   10
 
-//Недостаток генераторов - чтобы получить новое значение, его нужно запросить, кроме того, они выполняются синхронно.
-//Генераторы не позволяют подписаться на изменение величины.
+//Проверка возможности перебора объекта как обычного массива.
+/*for (let item of consumer) {
+  console.log(item)
+}*/
 
-//RxJS позволяет совместить преимущества промисов и генераторов: подписаться на изменение величины и асинхронно
-// поочерёдно получать значения lazy push collection.
-
-
-//RxJS позволяет работать со многими значениями во времени (multiply queries over time).
-//При решении синхронных задач для этой цели используются массивы.
-//Для решения асинхронных задач для работы со многими значениями во времени прекрасно подходит Observable RxJS.
-//Использовать RxJS следует только при возникновении необходимости (для асинхронной работы со МНОГИМИ значениями во
-// времени), когда применяется комплексная логика с большим количеством асинхронных событий.
-//Для асинхронной работы с одиночными значениями прекрасно подходят Promise (async - await).
-import {interval} from "rxjs"
-
-interval(1000).subscribe((value)=>{
-  console.log(value)
-})
+//Проверка возможности создания массива из итерируемого объекта
+Array.from(consumer).forEach(value => console.log(value))
