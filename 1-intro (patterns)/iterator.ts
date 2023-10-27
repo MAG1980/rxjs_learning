@@ -1,7 +1,3 @@
-//ReactiveX pattern
-//ReactiveX = Iterator + Observer + Functional Programming
-
-//Для распределения данных, приходящих от Observer, во времени требуется Iterator
 //Паттерн Iterator стандартизует распределение данных во времени.
 //Паттерн Iterator позволяет распределять данные во времени независимо от их формата (файлы,строки, числа, JSON -
 // неважно)
