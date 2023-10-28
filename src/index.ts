@@ -1,4 +1,4 @@
-import { interval, Observable } from "rxjs";
+import { fromEvent, interval, Observable } from "rxjs";
 
 //Названия переменных, содержащих lazy push collections, должно оканчиваться на $.
 //Если Promise принимает функции resolve и reject, то
@@ -47,6 +47,15 @@ setTimeout(() => subscription.unsubscribe(), 3000)
   т.к. RxJS обладает богатым набором операторов создания,
   а также встроенных методов для работы с Observable.*/
 
+/*
+Потоки бывают горячими и холодными.
+Холодный поток - независимо от момента подписки на наго формируемые потоком данные будут начинаться с одного и того же начального значения.
+Горячий поток - начальное значение данных, формируемых потоком, вычисляется в момент подписки.
+Документация RxJS: если Producer находится внутри Observable, то этот поток холодный,
+если вне - то горячий.
+*/
+
+//Пример холодного потока
 const sequence2$ = interval(1000)
 
 /*Вызов метода subscribe у потока возвращает объект подписки,
@@ -58,3 +67,12 @@ const subscriber1 = sequence2$.subscribe(value=>console.log('Subscription1 ', va
 const subscriber2 = sequence2$.subscribe(value=>console.log('Subscription2 ', value))
 
 setTimeout(()=>subscriber1.unsubscribe(), 3000)
+
+//Пример горячего потока
+const sequence3$ = fromEvent<MouseEvent>(document, 'click')
+
+const subscription3 = sequence3$.subscribe(event=>console.log('Subscription3: ', event.clientX))
+
+setTimeout(()=>{
+  sequence3$.subscribe(event=>console.log('Subscription4:', event.clientX))
+}, 5000)
