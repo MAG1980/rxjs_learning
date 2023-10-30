@@ -1,4 +1,4 @@
-import { combineLatest, fromEvent, map, Observable, tap } from "rxjs";
+import { combineLatest, fromEvent, map, Observable, startWith, tap } from "rxjs";
 
 const quality = fromEvent(document.getElementById('quality') as HTMLInputElement, 'change')
 const rating = fromEvent(document.getElementById('rating') as HTMLInputElement, 'change')
@@ -11,6 +11,11 @@ const actualValue =getRangeInputValue(actual)
 
 //combineLatest - объединяет в массив последние значения каждого из полученных потоков
 const slideSequence$ = combineLatest([qualityValue,ratingValue,actualValue])
+  .pipe(
+    map(([qualityValue, ratingValue, actualValue])=>{
+      return Math.round((qualityValue + ratingValue + actualValue)/3)
+    })
+  )
   .subscribe(value => console.log(value))
 
 /**
@@ -25,7 +30,9 @@ function getRangeInputValue(source$: Observable<Event>) {
         return event.target as HTMLInputElement
       }),
       tap(changeInputColor),
-      map((inputElement: HTMLInputElement) => inputElement.value)
+      map((inputElement: HTMLInputElement) => parseInt(inputElement.value)),
+      //Задание начального значения горячего потока
+      startWith(5)
     )
 }
 
