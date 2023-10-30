@@ -1,10 +1,53 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #inputs {
+            height: 20vh;
+            display: flex;
+            align-items: center;
+        }
+
+        #container {
+            margin: 0 auto;
+            width: 50vw;
+            height: 10vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        input[range] {
+            transition: accent-color 450ms ease-in;
+        }
+
+        .bad {
+            accent-color: red;
+        }
+
+        .normal {
+            accent-color: yellow;
+        }
+
+        .good {
+            accent-color: green;
+        }
+
+    </style>
 </head>
 <body>
-<input type="text">
+<section id="inputs">
+    <div id="container">
+        <input id="quality" type="range">
+        <input id="rating" type="range">
+        <input id="actual" type="range">
+        <input type="text" name="" id="text">
+    </div>
+</section>
 </body>
 </html>
