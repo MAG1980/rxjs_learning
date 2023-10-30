@@ -1,4 +1,4 @@
-import { combineLatest, fromEvent, map, Observable, startWith, tap } from "rxjs";
+import { combineLatest, fromEvent, map, Observable, startWith, tap, withLatestFrom } from "rxjs";
 
 const quality = fromEvent(document.getElementById('quality') as HTMLInputElement, 'change')
 const rating = fromEvent(document.getElementById('rating') as HTMLInputElement, 'change')
@@ -6,15 +6,23 @@ const actual = fromEvent(document.getElementById('actual') as HTMLInputElement, 
 
 //Если не подписаться на поток, то функция не будет вызывать изменений в DOM
 const qualityValue =getRangeInputValue(quality)
-const ratingValue =getRangeInputValue(rating)
-const actualValue =getRangeInputValue(actual)
+const ratingValue = getRangeInputValue(rating)
+const actualValue = getRangeInputValue(actual)
 
 //combineLatest - объединяет в массив последние значения каждого из полученных потоков
-const slideSequence$ = combineLatest([qualityValue,ratingValue,actualValue])
+const slideSequence$ = combineLatest([qualityValue, ratingValue, actualValue])
   .pipe(
-    map(([qualityValue, ratingValue, actualValue])=>{
-      return Math.round((qualityValue + ratingValue + actualValue)/3)
+    map(([qualityValue, ratingValue, actualValue]) => {
+      return Math.round((qualityValue + ratingValue + actualValue) / 3)
     })
+  )
+
+fromEvent<MouseEvent>(
+  document.getElementById('send-result') as HTMLButtonElement, 'click'
+)
+  .pipe(
+    //Получение последнего значения полученного потока
+    withLatestFrom(slideSequence$)
   )
   .subscribe(value => console.log(value))
 
