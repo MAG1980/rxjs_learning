@@ -1,13 +1,27 @@
-import { fromEvent, map, tap } from "rxjs";
+import { fromEvent, map, Observable, tap } from "rxjs";
 
 const quality = fromEvent(document.getElementById('quality') as HTMLInputElement, 'change')
 const rating = fromEvent(document.getElementById('rating') as HTMLInputElement, 'change')
 const actual = fromEvent(document.getElementById('actual') as HTMLInputElement, 'change')
 
-quality.pipe(
-  map((event: Event) => event.target as HTMLInputElement),
-  tap(changeInputColor)
-).subscribe((qualityValue) => console.log('qualityValue: ', qualityValue))
+//Если не подписаться на поток, то функция не будет вызывать изменений в DOM
+getRangeInputValue(quality).subscribe(value => console.log(value))
+
+/**
+ * Преобразует поток событий change в поток значений rangeInput,
+ * выполняя сайд эффект по изменению цвета HTML элемента
+ * @param source$ Observable<Event>
+ */
+function getRangeInputValue(source$: Observable<Event>) {
+  return source$
+    .pipe(
+      map((event: Event) => {
+        return event.target as HTMLInputElement
+      }),
+      tap(changeInputColor),
+      map((inputElement: HTMLInputElement) => inputElement.value)
+    )
+}
 
 /**
  * Принимает input type="range" и изменяет его цвет в зависимости от значения
