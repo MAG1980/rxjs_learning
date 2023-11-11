@@ -1,17 +1,42 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+	<meta charset="UTF-8">
+	<meta name="viewport"
+	      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<style>
+		#inputs {
+			height: 20vh;
+			display: flex;
+			align-items: center;
+		}
+
+		#container {
+			margin: 0 auto;
+			width: 50vw;
+			height: 10vh;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+		}
+
+		input[range] {
+			transition: accent-color 450ms ease-in;
+		}
+
+		.input-text{
+			line-height: 30px;
+		}
+
+	</style>
 </head>
 <body>
 <section id="inputs">
-    <div id="container">
-        <button id="send-result" type="button">Submit</button>
-    </div>
+	<div id="container">
+		<input id="quality" class="input-text" type="text">
+	</div>
 </section>
 </body>
 </html>
