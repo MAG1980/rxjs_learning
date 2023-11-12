@@ -22,48 +22,46 @@ export interface IResult {
   postId: number
 }
 
-const InputElement = document.getElementById('search') as HTMLInputElement
-const container = document.querySelector(".container") as HTMLDivElement
-fromEvent<KeyboardEvent>(InputElement, 'input')
-  .pipe(
-    debounceTime(300),
-    map(event => (event?.target as HTMLInputElement).value),
-    //Фильтрация длины поискового запроса
-    filter((postId: string) => postId.length > 1),
-    //Обрезка пробельных символов в начале и конце строки и преобразование к типу number
-    map((postId: string) => parseInt(postId.trim())),
-    //Предотвращает последующие идентичные выбросы из наблюдаемого (сравнивает ссылки на объекты)
-    //Сравнивает текущее значение с последним переданным значением (не имеет глубокой истории).
-    //Хорошо работает в связке с debounceTime.
-    distinctUntilChanged(),
-    switchMap((postId: number) => {
-      return ajax(`https://jsonplaceholder.typicode.com/comments?postId=${postId}`)
-        .pipe(
-          map<AjaxResponse<any>, IResult[]>((httpResponse: AjaxResponse<any>) => httpResponse.response),
-          //Преобразуем входной массив в поток, состоящий из элементов массива
-          concatAll(),
-          map((item: IResult) => createCard(item)),
-          //Объединяет элементы входного потока в группы
-          bufferCount(3),
-          //Формирование ряда карточек из массива HTML-строк
-          reduce((resultStr: string, htmlStr: string[]) => {
-            return resultStr += createRow(htmlStr)
-          }, ''),
-          map(resultStr => resultStr.trim().replace(/\s(<)/g, '<'))
-        )
-    })
-  )
-  .subscribe(htmlString => container.innerHTML=htmlString)
+export function liveSearch(
+  source$: Observable<KeyboardEvent>,
+  request: (postId: number) => Observable<any>
+) {
+  return source$
+    .pipe(
+      debounceTime(300),
+      map(event => (event?.target as HTMLInputElement).value),
+      //Фильтрация длины поискового запроса
+      filter((postId: string) => postId.length > 1),
+      //Обрезка пробельных символов в начале и конце строки и преобразование к типу number
+      map((postId: string) => parseInt(postId.trim())),
+      //Предотвращает последующие идентичные выбросы из наблюдаемого (сравнивает ссылки на объекты)
+      //Сравнивает текущее значение с последним переданным значением (не имеет глубокой истории).
+      //Хорошо работает в связке с debounceTime.
+      distinctUntilChanged(),
+      switchMap(request)
+    )
+}
 
 export function request(source$: Observable<any>) {
-  return source$.pipe(
-    map(httpResponse => httpResponse.response)
-  )
+  return source$
+    .pipe(
+      map<AjaxResponse<XMLHttpRequestResponseType>, IResult[]>((httpResponse: AjaxResponse<any>) => httpResponse.response),
+      //Преобразуем входной массив в поток, состоящий из элементов массива
+      concatAll(),
+      map((item: IResult) => createCard(item)),
+      //Объединяет элементы входного потока в группы
+      bufferCount(3),
+      //Формирование ряда карточек из массива HTML-строк
+      reduce((resultStr: string, htmlStr: string[]) => {
+        return resultStr += createRow(htmlStr)
+      }, ''),
+      map((resultStr: string): string => resultStr.trim().replace(/\s(<)/g, '<'))
+    )
 }
 
 export function createCard({ body, email, id, name, postId }: IResult) {
   return `
-  <div class="col-md-4">
+  <div class="col-6 col-sm-4">
         <div class="card">
             <img src="https://placehold.co/600x400/orange/white" alt="" class="card-img-top">
         </div>
